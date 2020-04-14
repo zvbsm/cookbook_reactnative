@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
+import { userSelector, useSelector } from 'react-redux';
 
 import MealItem from './MealItem';
 
 const MealList = props => {
+	// hooks (useSelector) cannot be used in nested function, only the root function
+	const favoriteMeals = useSelector(state => state.meals.favoriteMeals);
 
 	const renderMealItem = itemData => {
+		const isFavorite = favoriteMeals.some(meal => meal.id === itemData.item.id);
+
 		return (
 			<MealItem
 				title={itemData.item.title}
@@ -15,14 +20,18 @@ const MealList = props => {
 				affordability={itemData.item.affordability}
 				onSelectMeal={() => {
 					props.navigation.navigate({
-						routeName: 'MealDetails', params: {
-							mealId: itemData.item.id
+						routeName: 'MealDetails', 
+						params: {
+							mealId: itemData.item.id,
+							// replacing the useEffect flow in MealDetailsScreen
+							mealTitle: itemData.item.title,
+							isFavorite: isFavorite
 						}
 					});
 				}}
 			/>
 		);
-	}
+	};
 
 	return (
 		<View style={styles.list}>

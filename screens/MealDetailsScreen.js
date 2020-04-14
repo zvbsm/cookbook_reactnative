@@ -1,10 +1,12 @@
-import React from 'react';
-import { ScrollView, Text, View, StyleSheet, Button, Image } from 'react-native';
+import React, { useEffect, useCallback } from 'react';
+import { ScrollView, Text, View, StyleSheet, Image } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+// useDispatch can not be using in navigationOptions same as useSelector
+import { useSelector, useDispatch } from 'react-redux';
 
-import { MEALS } from '../data/dummyData';
 import HeaderButton from '../components/HeaderButton';
 import DefaultText from '../components/DefaultText';
+import { toggleFavorite } from '../store/actions/meals';
 
 const ListItem = props => {
 	return (
@@ -15,8 +17,29 @@ const ListItem = props => {
 };
 
 const MealDetailsScreen = props => {
+	const availableMeals = useSelector(state => state.meals.meals);
 	const mealId = props.navigation.getParam('mealId');
-	const selectedMeal = MEALS.find(meal => meal.id === mealId);
+	// some() returns true if at least one item in array matches the condition
+	const currentMealIsFavorite = useSelector(state => 
+		state.meals.favoriteMeals.some(meal => meal.id === mealId)
+	);
+	const selectedMeal = availableMeals.find(meal => meal.id === mealId);
+
+	const dispatch = useDispatch();
+	const toggleFavoriteHandler = useCallback(() => {
+		dispatch(toggleFavorite(mealId));
+	}, [dispatch, mealId]);
+
+	useEffect(() => {
+		// by itself, this would trigger an infinite loop, so
+		// wrap in useEffect to prevent it along with wrapping handler in useCallback 
+		props.navigation.setParams({ toggleFavorite: toggleFavoriteHandler });
+		// when input changes, trigger useEffect to setParams
+	}, [toggleFavoriteHandler]);
+
+	useEffect(() => {
+		props.navigation.setParams({ isFavorite: currentMealIsFavorite });
+	}, [currentMealIsFavorite]);
 
 	return (
 		<ScrollView>
@@ -39,17 +62,21 @@ const MealDetailsScreen = props => {
 				<ListItem key={step}>{step}</ListItem>
 			))}
 		</ScrollView>
-	)
+	);
 };
 
 // load data dynamically to the MealDetailsScreen by running the navigationData method
 // thats provided by the navigation component by default
-MealDetailsScreen.navigationOptions = (navigationData) => {
-	const mealId = navigationData.navigation.getParam('mealId');
-	const selectedMeal = MEALS.find(meal => meal.id === mealId);
+MealDetailsScreen.navigationOptions = navigationData => {
+	// hooks (useSelector) can only be used inside of other hooks or functional components
+	// therefore, cannot use in navigationOptions (normal function)
+
+	const mealTitle = navigationData.navigation.getParam('mealTitle');
+	const toggleFavorite = navigationData.navigation.getParam('toggleFavorite');
+	const isFavorite = navigationData.navigation.getParam('isFavorite');
 
 	return {
-		headerTitle: selectedMeal.title,
+		headerTitle: mealTitle,
 		// HeaderButtonComponent tells the Headerbuttons which custom 
 		// component to use to render the item specified within
 		headerRight: () => {
@@ -57,9 +84,11 @@ MealDetailsScreen.navigationOptions = (navigationData) => {
 				<HeaderButtons HeaderButtonComponent={HeaderButton}>
 					{/* title specified as fallback if icon is not found or specified
 					 // title gets used as a key so multiple items should have different titles */}
-					<Item title="Favorite" iconName='ios-star' onPress={() => {
-						console.log('Mark as Favorite');
-					}} />
+					<Item 
+						title="Favorite" 
+						iconName={isFavorite ? 'ios-star' : 'ios-star-outline'} 
+						onPress={toggleFavorite} 
+					/>
 				</HeaderButtons>
 			);
 		}

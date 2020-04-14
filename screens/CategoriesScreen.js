@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 
 import { CATEGORIES } from '../data/dummyData';
@@ -16,7 +16,8 @@ const CategoriesScreen = props => {
 			onSelect={() => {
 				// params just like angular ui-router
 				props.navigation.navigate({
-					routeName: 'CategoryMeals', params: {
+					routeName: 'CategoryMeals', 
+					params: {
 						categoryId: itemData.item.id
 					}
 				});

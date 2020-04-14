@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, StyleSheet, Switch, Platform } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import { useDispatch } from 'react-redux';
 
 import HeaderButton from '../components/HeaderButton';
 import Colors from '../constants/Colors';
+import { setFilters } from '../store/actions/meals';
 
 const FilterSwitch = props => {
 	return (
@@ -32,7 +34,7 @@ const FiltersScreen = props => {
 	const [isLactoseFree, setIsLactoseFree] = useState(false);
 	const [isVegan, setIsVegan] = useState(false);
 	const [isVegetarian, setIsVegetarian] = useState(false);
-
+	const dispatch = useDispatch();
 	// by wrapping the method in useCallback, saveFilters gets cached and is only
 	// recreated when its dependencies change. anything else in the component that
 	// triggers saveFilters to re-render will not also recreate the method.
@@ -44,10 +46,12 @@ const FiltersScreen = props => {
 			vegan: isVegan,
 			vegetarian: isVegetarian
 		}
-		console.log(appliedFilters);
+		
+		dispatch(setFilters(appliedFilters));
+		
 		// specify the variables that are to be used as dependencies for useCallback
 		// this will make saveFilters be re-created when any of these values are changed
-	}, [isGlutenFree, isLactoseFree, isVegan, isVegetarian]);
+	}, [isGlutenFree, isLactoseFree, isVegan, isVegetarian, dispatch]);
 
 	useEffect(() => {
 		// setParams is used to update the params for the current screen

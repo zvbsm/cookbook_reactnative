@@ -18,7 +18,7 @@ import Colors from '../constants/Colors';
 
 const defaultStackNavigatorOptions = {
 	headerStyle: {
-		backgroundColor: Platform.OS === 'android' ? Colors.primaryColor : 'white'
+		backgroundColor: Platform.OS === 'android' ? Colors.primaryColor : ''
 	},
 	headerTitleStyle: {
 		fontFamily: 'open-sans-bold'
@@ -69,7 +69,8 @@ const tabScreenConfig = {
 	// add icons by specifying navigationOptions here or within the createStackNavigator as another key value pair
 	// only needs to be here if navigator is used inside of another navigator
 	Meals: {
-		screen: MealsNavigator, navigationOptions: {
+		screen: MealsNavigator, 
+		navigationOptions: {
 			// tabInfo refers to the values provided in tabBarOptions below
 			tabBarIcon: (tabInfo) => {
 				return <Ionicons name="ios-restaurant" size={25} color={tabInfo.tintColor} />;
@@ -82,7 +83,8 @@ const tabScreenConfig = {
 		}
 	},
 	Favorites: {
-		screen: FavoritesNavigator, navigationOptions: {
+		screen: FavoritesNavigator, 
+		navigationOptions: {
 			// the key "Favorites" will be used in the UI by default
 			// tabBarLabel allows for overriding that
 			// tabBarLabel: 'Something else',
@@ -129,18 +131,25 @@ const FiltersNavigator = createStackNavigator({
 	defaultNavigationOptions: defaultStackNavigatorOptions
 });
 
-const MainNavigator = createDrawerNavigator({
-	MealsFavorites: MealsFavoritesTabNavigator,
-	Filters: FiltersNavigator
-}, {
-	// customize the style of drawer items
-	contentOptions: {
-		activeTintColor: Colors.accentColor,
-		labelStyle: {
-			fontFamily: 'open-sans-bold'
+const MainNavigator = createDrawerNavigator(
+	{
+		MealsFavorites: {
+			screen: MealsFavoritesTabNavigator,
+			navigationOptions: {
+				drawerLabel: 'Meals'
+			}
+		},
+		Filters: FiltersNavigator
+	}, {
+		// customize the style of drawer items
+		contentOptions: {
+			activeTintColor: Colors.accentColor,
+			labelStyle: {
+				fontFamily: 'open-sans-bold'
+			}
 		}
 	}
-});
+);
 
 // mealsNavigator gets replaced with tabs navigator since meals nav is nested
 // within the tab navigator already
